@@ -1,4 +1,9 @@
-require("dotenv").config();
+const path = require("path");
+
+require("dotenv").config({
+    path: path.resolve(__dirname, "../../.env")
+});
+
 
 const { ethers } = require('ethers');
 const express = require('express');
@@ -33,3 +38,7 @@ module.exports = {
 // console.log("---------");
 // console.log("---------");
 // console.log(abi);
+
+// console.log(wallet)
+// console.log(__dirname)
+// console.log(__filename)

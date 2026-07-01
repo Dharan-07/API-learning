@@ -1,5 +1,5 @@
 const { ethers } = require('ethers');
-const { contract, wallet } = require('../config')
+const { contract, wallet } = require('./config')
 
 const express = require('express')
 const app = express();
