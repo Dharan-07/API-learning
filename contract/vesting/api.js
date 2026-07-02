@@ -80,6 +80,62 @@ app.post("/claim", async (req, res) => {
     }
 })
 
+app.post("/claimAll", async (req, res) => {
+    try {
+
+        // 1. Call the smart contract
+        const tx = await contract.claimAll();
+
+        // 2. Wait until the transaction is mined
+        const receipt = await tx.wait();
+
+        // 3. Store all claimed vesting information
+        const claimedVestings = [];
+
+        // 4. Loop through every log emitted in the transaction
+        for (const log of receipt.logs) {
+
+            try {
+
+                // Decode the log using your vesting contract ABI
+                const parsedLog = contract.interface.parseLog(log);
+
+                // Only process TokenClaimed events
+                if (parsedLog.name === "TokenClaimed") {
+
+                    claimedVestings.push({
+                        beneficiary: parsedLog.args.beneficiary,
+                        vestId: parsedLog.args.vestingId.toString(),
+                        amount: ethers.formatUnits(parsedLog.args.amount, 18)
+                    });
+
+                }
+
+            } catch (err) {
+                // Ignore logs that don't belong to this contract
+            }
+        }
+
+        // 5. Send response
+        res.status(200).json({
+            success: true,
+            transactionHash: tx.hash,
+            totalVestingsClaimed: claimedVestings.length,
+            claimedVestings,
+            message: "All claimable vestings claimed successfully"
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
 // BY using this we creating a server in a specified port address, this is the starting point  
 app.listen(4000, () => {
     console.log("server running on port 4000")
