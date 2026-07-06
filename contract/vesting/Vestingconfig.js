@@ -1,6 +1,6 @@
 const path = require("path");
 
-require("dotenv").config({});
+require("dotenv").config({}); // if path is somewhere outside path: path.resolve(__dirname, "../.env")
 
 
 const { ethers } = require('ethers');
@@ -36,3 +36,5 @@ module.exports = {
 // console.log("---------");
 // console.log("---------");
 // console.log(abi);
+
+//console.log( path.resolve(__dirname, "../.env"))
