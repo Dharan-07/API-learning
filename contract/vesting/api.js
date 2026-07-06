@@ -59,26 +59,54 @@ app.post("/vest", async (req, res) => {
 })
 
 app.post("/claim", async (req, res) => {
-
     try {
         const { vestId } = req.body;
 
+        // Call the smart contract
         const tx = await contract.claim(vestId);
+
+        // Wait for transaction to be mined
         const receipt = await tx.wait();
+
+        let claimedInfo = null;
+
+        // Read all logs emitted by the transaction
+        for (const log of receipt.logs) {
+            try {
+                const parsedLog = contract.interface.parseLog(log);
+
+                // Process only TokenClaimed event
+                if (parsedLog.name === "TokenClaimed") {
+                    claimedInfo = {
+                        beneficiary: parsedLog.args.beneficiary,
+                        vestId: parsedLog.args.vestingId.toString(),
+                        amount: ethers.formatUnits(parsedLog.args.amount, 18)
+                    };
+
+                    break; // Only one TokenClaimed event is expected
+                }
+            } catch (err) {
+                // Ignore logs that don't belong to this contract
+            }
+        }
 
         res.status(200).json({
             success: true,
             transactionHash: tx.hash,
-            message: "amount claimed successfully"
-        })
+            claimedInfo,
+            message: "Amount claimed successfully"
+        });
+
     } catch (error) {
         console.log(error);
+
         res.status(500).json({
             success: false,
             error: error.message
-        })
+        });
     }
-})
+});
+
 
 app.post("/claimAll", async (req, res) => {
     try {
