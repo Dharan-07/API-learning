@@ -67,6 +67,7 @@ app.post("/claim", async (req, res) => {
 
         // Wait for transaction to be mined
         const receipt = await tx.wait();
+        console.log(receipt);
 
         let claimedInfo = null;
 
@@ -74,6 +75,7 @@ app.post("/claim", async (req, res) => {
         for (const log of receipt.logs) {
             try {
                 const parsedLog = contract.interface.parseLog(log);
+                console.log(parsedLog)
 
                 // Process only TokenClaimed event
                 if (parsedLog.name === "TokenClaimed") {
